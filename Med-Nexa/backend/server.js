@@ -35,7 +35,7 @@ const server = http.createServer(app);
 // Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: 'https://frontend-one-sepia-k13hmzhkjv.vercel.app/' || 'http://localhost:5173',
+    origin: 'https://frontend-one-sepia-k13hmzhkjv.vercel.app' || 'http://localhost:5173',
     credentials: true
   }
 });
@@ -67,7 +67,7 @@ const authLimiter = rateLimit({
 
 // Middleware
 app.use(cors({
-  origin: 'https://frontend-one-sepia-k13hmzhkjv.vercel.app/' || 'http://localhost:5173',
+  origin: 'https://frontend-one-sepia-k13hmzhkjv.vercel.app' || 'http://localhost:5173',
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
