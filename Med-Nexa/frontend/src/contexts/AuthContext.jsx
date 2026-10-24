@@ -38,6 +38,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
     if (data.success) {
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      }
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
       setUser(data.user);
       setDoctorProfile(data.doctorProfile);
       connectSocket();
@@ -48,6 +54,12 @@ export const AuthProvider = ({ children }) => {
   const register = async (formData) => {
     const { data } = await api.post('/auth/register', formData);
     if (data.success) {
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      }
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
       setUser(data.user);
       connectSocket();
     }
@@ -59,10 +71,14 @@ export const AuthProvider = ({ children }) => {
       await api.post('/auth/logout');
     } catch (e) {
       // ignore
+    } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('token');
+      setUser(null);
+      setDoctorProfile(null);
+      disconnectSocket();
     }
-    setUser(null);
-    setDoctorProfile(null);
-    disconnectSocket();
   };
 
   const value = {

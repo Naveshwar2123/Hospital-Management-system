@@ -13,27 +13,38 @@ const generateRefreshToken = (userId) => {
 };
 
 const setTokenCookies = (res, accessToken, refreshToken) => {
-  const isProduction = process.env.NODE_ENV === 'production';
+  // Check if we are running in production or cross-site (Vercel frontend + Render backend)
+  const isProduction = process.env.NODE_ENV === 'production' ||
+    (process.env.CLIENT_URL && !process.env.CLIENT_URL.includes('localhost'));
 
-  res.cookie('accessToken', accessToken, {
+  const cookieOptions = {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? 'strict' : 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: 15 * 60 * 1000 // 15 minutes
-  });
+  };
+
+  res.cookie('accessToken', accessToken, cookieOptions);
 
   res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'strict' : 'lax',
+    ...cookieOptions,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/api/auth/refresh'
+    path: '/'
   });
 };
 
 const clearTokenCookies = (res) => {
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken', { path: '/api/auth/refresh' });
+  const isProduction = process.env.NODE_ENV === 'production' ||
+    (process.env.CLIENT_URL && !process.env.CLIENT_URL.includes('localhost'));
+
+  const clearOptions = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax'
+  };
+
+  res.clearCookie('accessToken', clearOptions);
+  res.clearCookie('refreshToken', { ...clearOptions, path: '/' });
 };
 
 module.exports = {

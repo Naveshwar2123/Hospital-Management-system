@@ -62,6 +62,8 @@ const register = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Registration successful',
+      accessToken,
+      refreshToken,
       user: user.toJSON()
     });
   } catch (error) {
@@ -117,6 +119,8 @@ const login = async (req, res) => {
     res.json({
       success: true,
       message: 'Login successful',
+      accessToken,
+      refreshToken,
       user: user.toJSON(),
       doctorProfile
     });
@@ -130,7 +134,7 @@ const login = async (req, res) => {
 // @route   POST /api/auth/refresh
 const refreshAccessToken = async (req, res) => {
   try {
-    const token = req.cookies.refreshToken;
+    const token = req.cookies?.refreshToken || req.body?.refreshToken || (req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : null);
     if (!token) {
       return res.status(401).json({ success: false, message: 'Refresh token not found' });
     }
@@ -150,7 +154,12 @@ const refreshAccessToken = async (req, res) => {
 
     setTokenCookies(res, accessToken, refreshToken);
 
-    res.json({ success: true, message: 'Token refreshed' });
+    res.json({ 
+      success: true, 
+      message: 'Token refreshed',
+      accessToken,
+      refreshToken 
+    });
   } catch (error) {
     return res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
   }

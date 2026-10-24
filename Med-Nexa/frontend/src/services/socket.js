@@ -1,13 +1,19 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+let rawSocketUrl = import.meta.env.VITE_SOCKET_URL;
+if (!rawSocketUrl && import.meta.env.VITE_API_URL) {
+  rawSocketUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+}
+const SOCKET_URL = (rawSocketUrl || 'http://localhost:5000').replace(/\/+$/, '');
 
 let socket = null;
 
 export const connectSocket = () => {
   if (socket && socket.connected) return socket;
   if (!socket) {
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
     socket = io(SOCKET_URL, {
+      auth: { token },
       withCredentials: true,
       transports: ['websocket', 'polling'],
       reconnection: true,
